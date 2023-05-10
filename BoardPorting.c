@@ -60,7 +60,7 @@ void PORTA_init(){
 	//Allow PortA to raise interupts from the NVIC controller
 	NVIC_EN0_R |= (1<<0);
 	//Set the priority of PortA interrupt
-	NVIC_PRI0_R |= 7<<5; // Set PortA priority to 4 --> Bits(5-7)
+	NVIC_PRI0_R |= 7U<<5; // Set PortA priority to 7 --> Bits(5-7)
 	
 	
 	// For correctly initializing the state of the on/off switch
@@ -221,7 +221,7 @@ void GPIOD_Handler(){
 
 
 void GPIOA_Handler(){
-//ISR of the driver pannel -> driver window controlls and On/Off switch
+//ISR of the driver pannel -> driver window controls and On/Off switch
 	
 	portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 	ACTION action_taken;
@@ -262,7 +262,7 @@ void GPIOA_Handler(){
 
 
 void GPIOE_Handler(){
-	//ISR of the driver/passenger pannel -> passenger window controlls
+	//ISR of the driver/passenger pannel -> passenger window controls
 	
 	portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 	ACTION action_taken;

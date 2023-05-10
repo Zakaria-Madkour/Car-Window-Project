@@ -3,7 +3,7 @@
  * Auto generated Run-Time-Environment Configuration File
  *      *** Do not modify ! ***
  *
- * Project: 'Lab4' 
+ * Project: 'carwindow' 
  * Target:  'Target 1' 
  */
 
