@@ -49,9 +49,9 @@
 
 ## FreeRTOS Data Structures Used
 
-1. Queues
-2. Semaphores
-3. Mutex Locks
+- 4 Queues
+- 4 Semaphores
+- 4 Mutex Locks
 
 <div class="page"/>
 
