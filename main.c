@@ -35,7 +35,20 @@ void passenger_task();
 void limit_task();
 void jam_task();
 
+/* Breadboard scheme
+DRIVER DOWN BUTTON PA3 -> YELLOW DOWN RIGHT  
+DRIVER UP BUTTON PA2 -> BROWN DOWN LEFT
+JAMMING DRIVER   PC4 -> BLUE DOWN LEFT
 
+
+DRIVER PASSENGER DOWN BUTTON PE2 -> YELLOW MIDDLE RIGHT  
+DRIVER PASSENGER UP BUTTON PE2 -> BROWN MIDDLE LEFT
+JAMMING PASSENGER   PC5 -> BLUE MIDDLE LEFT
+
+
+PASSENGER DOWN P PE5 -> YELLOW UP RIGHT
+PASSENGER UP   P PE4 -> BROWN UP LEFT
+*/
 
 int main(){
 	// Create the required semaphores, queues, locks  ---> All the interrupts must be disabled until queues and semaphores are created	
@@ -44,11 +57,11 @@ int main(){
 	create_mutex();
 
 	// Create the required tasks
-	xTaskCreate( driver_task, "Driver", 40, NULL, 6, NULL );
-	xTaskCreate( passenger_task, "Passenger", 40, NULL, 4, NULL );
+	xTaskCreate( driver_task, "Driver", 240, NULL, 6, NULL );
+	xTaskCreate( passenger_task, "Passenger", 240, NULL, 4, NULL );
 
-	xTaskCreate( limit_task, "Limit", 40, NULL, 10, NULL );
-	xTaskCreate( jam_task, "Jam", 40, NULL, 8, NULL );
+	xTaskCreate( limit_task, "Limit", 240, NULL, 10, NULL );
+	xTaskCreate( jam_task, "Jam", 240, NULL, 8, NULL );
 	
 	// Initialization of the used ports
 	/* Note-> Board initialization must come at last because 
@@ -74,17 +87,18 @@ int main(){
 
 void driver_task(){
 	ACTION driver_action;
-	xSemaphoreTake(driver_semaphore,portMAX_DELAY);
-	xQueueReceive( driver_queue, &driver_action, portMAX_DELAY);
+
 	while(1)
 		{
+			xSemaphoreTake(driver_semaphore,portMAX_DELAY);
+			xQueueReceive( driver_queue, &driver_action, portMAX_DELAY);
 		switch(driver_action)
 		{
 			case DRIVER_UP:
-				if (driver_state == IN_BETWEEN || FULLY_DOWN || MOVING_DOWN || AUTOMATIC_DOWN)
+				if ((driver_state == IN_BETWEEN) || (driver_state == FULLY_DOWN) || (driver_state == MOVING_DOWN) || (driver_state == AUTOMATIC_DOWN))
 				{
 					if (driver_up_pressed())
-					{// delay to dive time for one touch
+					{// delay to give time for one touch
 						vTaskDelay(100/portTICK_RATE_MS);
 					
 					if (!driver_up_pressed())
@@ -124,10 +138,10 @@ void driver_task(){
 					}	
 			}	
 			case DRIVER_DOWN:
-				if (driver_state == IN_BETWEEN || FULLY_UP || MOVING_UP || AUTOMATIC_UP)
+				if ((driver_state == IN_BETWEEN) || (driver_state == FULLY_UP) || (driver_state == MOVING_UP) || (driver_state == AUTOMATIC_UP))
 				{
 					if (driver_down_pressed())
-					{// delay to dive time for one touch
+					{// delay to give time for one touch
 						vTaskDelay(100/portTICK_RATE_MS);
 					
 					if (!driver_down_pressed())
@@ -173,20 +187,20 @@ void driver_task(){
 void passenger_task(){
 	
 	ACTION passenger_action;
-	xSemaphoreTake(passenger_semaphore,portMAX_DELAY);
-	xQueueReceive( passenger_queue, &passenger_action, portMAX_DELAY);
 	while(1)
 		{
+			xSemaphoreTake(passenger_semaphore,portMAX_DELAY);
+			xQueueReceive( passenger_queue, &passenger_action, portMAX_DELAY);
 		switch(passenger_action)
 		{
 			case PASSENGER_UP:
-				if (passenger_state == IN_BETWEEN || FULLY_DOWN || MOVING_DOWN || AUTOMATIC_DOWN)
+				if ((passenger_state == IN_BETWEEN) || (passenger_state == FULLY_DOWN) || (passenger_state == MOVING_DOWN) || (passenger_state == AUTOMATIC_DOWN))
 				{
 					if (passenger_up_pressed())
-					{// delay to dive time for one touch
+					{// delay to give time for one touch
 						vTaskDelay(100/portTICK_RATE_MS);
 					
-					if (!driver_up_pressed())
+					if (!passenger_up_pressed())
 					{	// auto up
 						xSemaphoreTake(passenger_state_mutex,portMAX_DELAY);
 						passenger_state = AUTOMATIC_UP;
@@ -196,6 +210,7 @@ void passenger_task(){
 						xSemaphoreGive(passenger_motor_mutex);
 						break;
 					}
+				
 					
 					else 
 						{ // manual up
@@ -221,12 +236,13 @@ void passenger_task(){
 							}
 						}
 					}	
-			}	
+				}
+	
 			case PASSENGER_DOWN:
-				if (passenger_state == IN_BETWEEN || FULLY_UP || MOVING_UP || AUTOMATIC_UP)
+				if ((passenger_state == IN_BETWEEN) || (passenger_state == FULLY_UP) || (passenger_state == MOVING_UP) || (passenger_state == AUTOMATIC_UP))
 				{
 					if (passenger_down_pressed())
-					{// delay to dive time for one touch
+					{// delay to give time for one touch
 						vTaskDelay(100/portTICK_RATE_MS);
 					
 					if (!passenger_down_pressed())
@@ -272,14 +288,15 @@ void passenger_task(){
 void limit_task(){
 	
 	ACTION limit_action;
-	xSemaphoreTake(limit_semaphore,portMAX_DELAY);
-	xQueueReceive( limit_queue, &limit_action, portMAX_DELAY);
+
 	while(1)
 		{
+			xSemaphoreTake(limit_semaphore,portMAX_DELAY);
+			xQueueReceive( limit_queue, &limit_action, portMAX_DELAY);
 		switch(limit_action)
 		{
 			case DRIVER_STOP:
-				if (driver_state == MOVING_UP || AUTOMATIC_UP)
+				if ((driver_state == MOVING_UP) || (driver_state == AUTOMATIC_UP))
 				{
 					xSemaphoreTake(driver_motor_mutex,portMAX_DELAY);
 					motor1_off();
@@ -288,7 +305,7 @@ void limit_task(){
 					driver_state=FULLY_UP;
 					xSemaphoreGive(driver_state_mutex);				
 				}
-				else if (driver_state == MOVING_DOWN || AUTOMATIC_DOWN)
+				else if ((driver_state == MOVING_DOWN) || (driver_state == AUTOMATIC_DOWN))
 				{
 					xSemaphoreTake(driver_motor_mutex,portMAX_DELAY);
 					motor1_off();
@@ -297,14 +314,11 @@ void limit_task(){
 					driver_state=FULLY_DOWN;
 					xSemaphoreGive(driver_state_mutex);				
 				}
-				else 
-				{ // do nothing someone is playing with limit switch
-					__asm(" nop");
-				}
+
 				
 				
 			case PASSENGER_STOP:
-				if (passenger_state == MOVING_UP || AUTOMATIC_UP)
+				if ((passenger_state == MOVING_UP) || (passenger_state == AUTOMATIC_UP))
 				{
 					xSemaphoreTake(passenger_motor_mutex,portMAX_DELAY);
 					motor2_off();
@@ -313,7 +327,7 @@ void limit_task(){
 					passenger_state=FULLY_UP;
 					xSemaphoreGive(passenger_state_mutex);				
 				}
-				else if (passenger_state == MOVING_DOWN || AUTOMATIC_DOWN)
+				else if ((passenger_state == MOVING_DOWN) || (passenger_state == AUTOMATIC_DOWN))
 				{
 					xSemaphoreTake(passenger_motor_mutex,portMAX_DELAY);
 					motor2_off();
@@ -322,10 +336,7 @@ void limit_task(){
 					passenger_state=FULLY_DOWN;
 					xSemaphoreGive(passenger_state_mutex);				
 				}
-				else 
-				{ // do nothing someone is playing with limit switch
-					__asm(" nop");
-				}
+
 			}
 		}
 	}
@@ -333,10 +344,11 @@ void limit_task(){
 void jam_task(){
 	
 	ACTION jam_action;
-	xSemaphoreTake(jam_semaphore,portMAX_DELAY);
-	xQueueReceive( jam_queue, &jam_action, portMAX_DELAY);
+
 	while(1)
 		{
+				xSemaphoreTake(jam_semaphore,portMAX_DELAY);
+				xQueueReceive( jam_queue, &jam_action, portMAX_DELAY);
 		switch(jam_action)
 		{
 			case DRIVER_STOP:
