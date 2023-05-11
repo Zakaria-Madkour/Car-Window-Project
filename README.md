@@ -26,6 +26,8 @@
     - [Automatic Jamming](#automatic-jamming)
   - [Project Schematic](#project-schematic)
 - [Application Description](#application-description)
+  - [State Diagram](#state-diagram)
+  - [Created Tasks](#created-tasks)
 
 
 
