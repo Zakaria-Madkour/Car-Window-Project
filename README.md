@@ -28,6 +28,7 @@
 - [Application Description](#application-description)
   - [State Diagram](#state-diagram)
   - [Created Tasks](#created-tasks)
+  - [Handling Corner Cases](#handling-corner-cases)
 
 
 
@@ -141,7 +142,56 @@
 
 ![Statedaigram](StateDiagram.png)
 
+<div class="page"/>
+
 ## Created Tasks
 
+1. Driver Task
+     - This Task is a Low Priority Task.
+     - This Task is used to control the driver side window.
+     - This Task waits for an external Interrupt i.e. the window up/down button.
+     - Initially the task attempts to take Semaphore which forces it to enter blockage state.
+     - Upon Interrupt, the Semaphore is given from the ISR along with a message from the Queue telling the Task the action to be taken.
+     - When handling Motor 1 state a Mutex Lock is first acquired then the state is changed then the Lock is released.
+
+2. Passenger Task
+     - This Task is the Lowest Priority Task.
+     - This Task is used to control the passenger side window.
+     - This Task is shared between the driver and passenger panels.
+     - This Task waits for an external Interrupt i.e. the window up/down button.
+     - Initially the task attempts to take semaphore which forces it to enter blockage state.
+     - Upon Interrupt, the Semaphore is given from the ISR along with a message from the Queue telling the Task the action to be taken.
+     - When handling Motor 2 state, a Mutex Lock is first acquired then the state is changed then the Lock is released.
+  
+3. Limit Task
+      - This Task is the Highest Priority Task.
+      - This Task is used to control the driver and passenger side windows' limits.
+      - This Task is shared between the driver and passenger windows.
+      - This Task waits for an external Interrupt i.e. the window fully up/down switch.
+      - Initially the task attempts to take semaphore which forces it to enter blockage state.
+      - Upon Interrupt, the Semaphore is given from the ISR along with a message from the Queue telling the Task the action to be taken.
+      - When handling Motor 1/2 states, a Mutex Lock is first acquired then the state is changed then the Lock is released.
+
+4. Jamming Task
+     - This Task is a High Priority Task.
+     - This Task is used to protect from jamming by automatically stopping the power window and moves it downward about 0.5 seconds if foreign matter gets caught in window during one touch auto close operation.
+     - This Task is shared between the driver and passenger windows.
+     - This Task waits for an external Interrupt i.e. the window fully up/down switch.
+     - Initially the task attempts to take semaphore which forces it to enter blockage state.
+     - Upon Interrupt, the Semaphore is given from the ISR along with a message from the Queue telling the Task the action to be taken.
+     - When handling Motor 1/2 states, a Mutex Lock is first acquired then the state is changed then the Lock is released.
 
 
+## Handling Corner Cases
+
+1. If driver pressed up and down on driver window simultaneously
+     - The button which was pushed first will be executed, then if it was released and the other is still pressed it will change direction.
+
+2. If driver pressed up on passenger window and passenger pressed down
+     - The first one to push will be executed.
+
+3. If the window is going up and down limit switch fired an interrupt or vice versa
+      - Nothing will happen as the only option to stop the window while going up is either to release the up button or an interrupt fired from the up limit switch.
+
+4. On/Off switch
+      - Closes the control to the passenger window from both passenger and driver panel.
