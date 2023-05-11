@@ -179,40 +179,43 @@ void GPIOD_Handler(){
 	
 	portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 	ACTION action_taken;
-	
+		/*for(int i=0; i<5000;i++){//---------------------------------------------------------------------------------------------------->>>>
+			__asm(" nop"); // Provide delay to allow for the signal to be written in the data register
+		}
+	*/
 	if((GPIO_PORTD_MIS_R & (1<<DRIVERUPLIMIT))!=0){//PD6 --> DriverUp limit
 		
-		action_taken = DRIVER_STOP;
+		action_taken = DRIVER_STOP_UP;
 		xSemaphoreGiveFromISR( limit_semaphore, &xHigherPriorityTaskWoken );
 		xQueueSendToBackFromISR( limit_queue, &action_taken, &xHigherPriorityTaskWoken );
 		
-		GPIO_PORTD_ICR_R |= (1<<DRIVERUPLIMIT);  // Clear the interrupt flags of pin 6
+		GPIO_PORTD_ICR_R |= 0xcc;  // Clear the interrupt flags of pin 6
 	}
 	else if((GPIO_PORTD_MIS_R & (1<<DRIVERDOWNLIMIT))!=0){//PD7 --> DriverDown limit
 		
-		action_taken = DRIVER_STOP;
+		action_taken = DRIVER_STOP_DOWN;
 		xSemaphoreGiveFromISR( limit_semaphore, &xHigherPriorityTaskWoken );
 		xQueueSendToBackFromISR( limit_queue, &action_taken, &xHigherPriorityTaskWoken );
 		
-		GPIO_PORTD_ICR_R |= (1<<DRIVERDOWNLIMIT);  // Clear the interrupt flags of pin 7
+		GPIO_PORTD_ICR_R |= 0xcc;  // Clear the interrupt flags of pin 7
 		
 	}
 	else if((GPIO_PORTD_MIS_R & (1<<PASSENGERUPLIMIT))!=0){//PD2 --> PassengerUp limit
 		
-		action_taken = PASSENGER_STOP;
+		action_taken = PASSENGER_STOP_UP;
 		xSemaphoreGiveFromISR( limit_semaphore, &xHigherPriorityTaskWoken );
 		xQueueSendToBackFromISR( limit_queue, &action_taken, &xHigherPriorityTaskWoken );
 		
-		GPIO_PORTD_ICR_R |= (1<<PASSENGERUPLIMIT);  // Clear the interrupt flags of pin 2
+		GPIO_PORTD_ICR_R |= 0xcc;  // Clear the interrupt flags of pin 2
 		
 	}
 	else if((GPIO_PORTD_MIS_R & (1<<PASSENGERDOWNLIMIT))!=0){//PD3 --> PassengerDown limit
 		
-		action_taken = PASSENGER_STOP;
+		action_taken = PASSENGER_STOP_DOWN;
 		xSemaphoreGiveFromISR( limit_semaphore, &xHigherPriorityTaskWoken );
 		xQueueSendToBackFromISR( limit_queue, &action_taken, &xHigherPriorityTaskWoken );
 		
-		GPIO_PORTD_ICR_R |= (1<<PASSENGERDOWNLIMIT);  // Clear the interrupt flags of pin 3
+		GPIO_PORTD_ICR_R |= 0xcc;  // Clear the interrupt flags of pin 3
 		
 	}
 	portEND_SWITCHING_ISR( xHigherPriorityTaskWoken );

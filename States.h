@@ -16,9 +16,13 @@ typedef enum { FULLY_UP,
 typedef enum { DRIVER_UP,
 							 DRIVER_DOWN,
 							 DRIVER_STOP,
+							 DRIVER_STOP_UP,
+							 DRIVER_STOP_DOWN,
 							 PASSENGER_UP,
 							 PASSENGER_DOWN,
-							 PASSENGER_STOP}ACTION ;
+							 PASSENGER_STOP,
+							 PASSENGER_STOP_UP,
+							 PASSENGER_STOP_DOWN}ACTION ;
 
 							 
 extern STATE driver_state;

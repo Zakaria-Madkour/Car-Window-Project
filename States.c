@@ -1,7 +1,7 @@
 # include "States.h"
 
 void create_queues(){
-	limit_queue = xQueueCreate( 5, sizeof( ACTION ) );
+	limit_queue = xQueueCreate( 1, sizeof( ACTION ) );
 	while(limit_queue == NULL); // Cant create queue increase heap size
 	
 	jam_queue = xQueueCreate( 5, sizeof( ACTION ) );
@@ -16,7 +16,7 @@ void create_queues(){
 }
 
 void create_semaphores(){
-	limit_semaphore = xSemaphoreCreateCounting( 5, 0 );
+	limit_semaphore = xSemaphoreCreateCounting( 1, 0 );
 	while(limit_semaphore == NULL); // Cant create semaphore increase heap size
 	
 	jam_semaphore = xSemaphoreCreateCounting( 5, 0 );

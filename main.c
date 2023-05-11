@@ -99,7 +99,7 @@ void driver_task(){
 				{
 					if (driver_up_pressed())
 					{// delay to give time for one touch
-						vTaskDelay(100/portTICK_RATE_MS);
+						vTaskDelay(250/portTICK_RATE_MS);
 					
 					if (!driver_up_pressed())
 					{	// auto up
@@ -142,7 +142,7 @@ void driver_task(){
 				{
 					if (driver_down_pressed())
 					{// delay to give time for one touch
-						vTaskDelay(100/portTICK_RATE_MS);
+						vTaskDelay(250/portTICK_RATE_MS);
 					
 					if (!driver_down_pressed())
 					{	// auto down
@@ -198,7 +198,7 @@ void passenger_task(){
 				{
 					if (passenger_up_pressed())
 					{// delay to give time for one touch
-						vTaskDelay(100/portTICK_RATE_MS);
+						vTaskDelay(250/portTICK_RATE_MS);
 					
 					if (!passenger_up_pressed())
 					{	// auto up
@@ -243,7 +243,7 @@ void passenger_task(){
 				{
 					if (passenger_down_pressed())
 					{// delay to give time for one touch
-						vTaskDelay(100/portTICK_RATE_MS);
+						vTaskDelay(250/portTICK_RATE_MS);
 					
 					if (!passenger_down_pressed())
 					{	// auto down
@@ -295,7 +295,7 @@ void limit_task(){
 			xQueueReceive( limit_queue, &limit_action, portMAX_DELAY);
 		switch(limit_action)
 		{
-			case DRIVER_STOP:
+			case DRIVER_STOP_UP:
 				if ((driver_state == MOVING_UP) || (driver_state == AUTOMATIC_UP))
 				{
 					xSemaphoreTake(driver_motor_mutex,portMAX_DELAY);
@@ -305,7 +305,9 @@ void limit_task(){
 					driver_state=FULLY_UP;
 					xSemaphoreGive(driver_state_mutex);				
 				}
-				else if ((driver_state == MOVING_DOWN) || (driver_state == AUTOMATIC_DOWN))
+				break;
+			case DRIVER_STOP_DOWN:
+				if ((driver_state == MOVING_DOWN) || (driver_state == AUTOMATIC_DOWN))
 				{
 					xSemaphoreTake(driver_motor_mutex,portMAX_DELAY);
 					motor1_off();
@@ -314,10 +316,11 @@ void limit_task(){
 					driver_state=FULLY_DOWN;
 					xSemaphoreGive(driver_state_mutex);				
 				}
-
+				break;
+			
+	
 				
-				
-			case PASSENGER_STOP:
+			case PASSENGER_STOP_UP:
 				if ((passenger_state == MOVING_UP) || (passenger_state == AUTOMATIC_UP))
 				{
 					xSemaphoreTake(passenger_motor_mutex,portMAX_DELAY);
@@ -327,7 +330,10 @@ void limit_task(){
 					passenger_state=FULLY_UP;
 					xSemaphoreGive(passenger_state_mutex);				
 				}
-				else if ((passenger_state == MOVING_DOWN) || (passenger_state == AUTOMATIC_DOWN))
+				break;
+				
+			case PASSENGER_STOP_DOWN:
+				if ((passenger_state == MOVING_DOWN) || (passenger_state == AUTOMATIC_DOWN))
 				{
 					xSemaphoreTake(passenger_motor_mutex,portMAX_DELAY);
 					motor2_off();

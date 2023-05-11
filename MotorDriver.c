@@ -86,8 +86,8 @@ void config_PWM_MOTOR(){
 				Calculate the duty cycle in down mode
 				PWMxCMPx = (100% - required duty cycle in %) * PWMxLOAD
 				*/
-				PWM0_0_CMPA_R = 20000;  /* set duty cyle to 10% PWM0CMPA */
-				PWM0_0_CMPB_R = 20000;  /* set duty cyle to 10% PWM0CMPB */
+				PWM0_0_CMPA_R = 30000;  /* set duty cyle to 25% PWM0CMPA */
+				PWM0_0_CMPB_R = 30000;  /* set duty cyle to 25% PWM0CMPB */
 				//-----------------------------------------------------------------------------
 				
 				PWM0_0_GENA_R = (1<<2)|(1<<3)|(1<<7);  /* Set PWM A output when counter reloaded and clear when matches PWMCMPA */
